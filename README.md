@@ -6,6 +6,9 @@ This project is an attempt to visualize inequities in NYC's property tax system,
 † http://furmancenter.org/thestoop/entry/new-york-city-property-tax-reform<br />
 † https://www.economist.com/finance-and-economics/2015/10/03/assessing-the-assessments<br />
 
+![images/caps.png](images/caps.png)
+![images/gentrication.png](images/gentrification.png)
+
 ## Explore the maps
 [2D Carto map](https://ksheng.carto.com/builder/2a0665fd-a3ba-4c4a-9d27-198ca99fdf4c/embed)<br />
 [3D kepler.gl map](https://drive.google.com/file/d/1234Po1ge4IhH5a4svLkN-yvvVmQkIlNV/view?usp=sharing) (this one loads the entire dataset client side, don't attempt this on mobile) 
@@ -56,26 +59,258 @@ The housing market in NYC is valued at over [1 trillion dollars](https://www1.ny
 So, in a situation where appreciation in the housing market massively benefits the richest of the rich, who are the main beneficiaries of this policy?
 
 ## From tax bills to maps
-PUMA data
+Retrive the raw tax bills (~10.5 GB, 130M rows):
 ```
-curl -o puma.geojson https://data.cityofnewyork.us/api/geospatial/cwiz-gcty?method=export&format=GeoJSON
-```
-
-MapPLUTO data
-```
-curl -o "#1mappluto.csv" https://common-data.carto.com/api/v2/sql?format=csv&q=select%20cartodb_id,%20the_geom,%20address,%20bbl,%20bldgarea,%20numbldgs,%20numfloors,%20ownername,%20unitsres,%20unitstotal,%20yearbuilt,%20zipcode%20from%20public.{mn,bx,bk,qn}mappluto
+$ curl -O http://taxbills.nyc/rawdata.csv
 ```
 
+Insert the csv into a postgres table:
+```
+$ psql -c 'drop table if exists rawdata cascade;'
+$ psql -c 'create table rawdata (
+         bbl bigint,
+         activityThrough DATE,
+         section TEXT,
+         key TEXT,
+         dueDate DATE,
+         activityDate DATE,
+         value TEXT,
+         meta TEXT,
+         apts TEXT
+        );'
+$ time psql -c "\\copy rawdata FROM 'rawdata.csv' WITH CSV HEADER NULL '' QUOTE '\"';"
+```
+
+```
+$ xsv frequency rawdata.csv -s activityThrough
+field,value,count
+activityThrough,2017-06-02,28584244
+activityThrough,2018-06-01,15532988
+activityThrough,2015-06-05,15509053
+activityThrough,2009-06-06,13890098
+activityThrough,2016-06-03,11455436
+activityThrough,2010-06-11,2429943
+activityThrough,2009-11-20,2422271
+activityThrough,2011-06-10,2416519
+activityThrough,2011-11-18,2403325
+activityThrough,2011-08-26,2333950
+```
+
+Filter only records from FY2017 since it has the most records.
+```
+SELECT * INTO TEMP fy2017 FROM rawdata where activityDate = '2017-06-02';
+```
+
+Pivot the table so that tax details go into columns:
+```
+SELECT * INTO details_crossed
+FROM crosstab('select bbl, key, value from details where key = ''estimated market value'' or key = ''tax before exemptions and abatements'' or key = ''tax before abatements'' or key = ''annual property tax'' or key = ''tax class'' or key = ''current tax rate''order by 1, 2')
+AS ct ("bbl" bigint, "estimated market value" text, "tax before exemptions and abatements" text, "tax before abatements" text, "annual property tax" text, "tax class" text, "current tax rate" text);
+```
+
+Save each borough as a separate CSV so they can be loaded into Carto's web interface:
+```
+\copy (SELECT * FROM details_crossed where LEFT(bbl::text, 1) = '1') TO '~/mntaxbills.csv' WITH CSV;
+\copy (SELECT * FROM details_crossed where LEFT(bbl::text, 1) = '2') TO '~/bxtaxbills.csv' WITH CSV;
+\copy (SELECT * FROM details_crossed where LEFT(bbl::text, 1) = '3') TO '~/bktaxbills.csv' WITH CSV;
+\copy (SELECT * FROM details_crossed where LEFT(bbl::text, 1) = '4') TO '~/qntaxbills.csv' WITH CSV;
+```
+
+Download MapPLUTO data:
+```
+$ curl -o "#1mappluto.csv" https://common-data.carto.com/api/v2/sql?format=csv&q=select%20cartodb_id,%20the_geom,%20address,%20bbl,%20bldgarea,%20numbldgs,%20numfloors,%20ownername,%20unitsres,%20unitstotal,%20yearbuilt,%20zipcode%20from%20public.{mn,bx,bk,qn}mappluto
+```
 This command will download a separate csv for each borough, more amenable to Carto's API limits.
 Instead of directly linking to the data library in Carto, I use their common data API to select the relevant columns and reupload the smaller table.
 
 There is a unified download for all 5 boroughs at https://common-data.carto.com/tables/nycpluto_all/public but it is too large to upload to import into a Carto student account, and also has a slightly different schema.
 
+Download PUMA data:
+```
+$ curl -o puma.geojson https://data.cityofnewyork.us/api/geospatial/cwiz-gcty?method=export&format=GeoJSON
+```
 
 You can explore the resulting CSVs using your tool of choice (I find xsv, SQLite, or csvkit + postgres usually work well, in order of complexity / "power").
 
-## Methodology
-Initial data exploration was done in Postgres, using nyc-db (which includes the taxbills). From the raw tax bills, I selected rows from 2017 (which had the most unique bbls), with nopv data (total taxes paid, abatements, tax rate etc), and pivoted each key to its own column. I then split this dataset (along with the gross_income records) by borough to make it more amenable to Carto's student account API limits.
+At this point, all of these lables were loaded into Carto's web interface for visual exploration, using the following query to get the main metrics.
+```
+SELECT
+ *
+FROM (
+SELECT
+	row_number() over() as cartodb_id,
+    the_geom,
+    the_geom_webmercator,
+    bbl,
+  	numbldgs,
+    property_tax,
+    market_value,
+    property_tax_noexempt / .06 / (LEFT(rate, 7)::float / 100) as effective_market_value,
+  	address,
+  	ownername,
+  	bldgarea,
+  	rate,
+  	market_value / GREATEST(numbldgs, 1) as market_value_per_building,
+    to_char(100.0*property_tax_noexempt / market_value,'999D9999%') as effective_rate,
+  	((.06 * market_value * LEFT(rate, 7)::float / 100) - property_tax_noexempt) as benefit,
+    CASE
+    	WHEN SUBSTRING(class, 2, 1) = '1' THEN (property_tax / market_value) / (.06 * LEFT(rate, 7)::float / 100)
+    ELSE (property_tax / market_value) / (.45 * LEFT(rate, 7)::float / 100)
+	END as div,
+    SUBSTRING(class, 2) as class
+FROM (
+  
+  SELECT
+    pluto.the_geom as the_geom,
+    pluto.the_geom_webmercator as the_geom_webmercator,
+    pluto.bbl as bbl,
+  	pluto.bldgarea as bldgarea,
+  	pluto.numbldgs as numbldgs,
+    pluto.address as address,
+  	pluto.ownername as ownername,
+  	tb.tax_before_exemptions_and_abatements as property_tax_noexempt,
+  	tb.tax_before_abatements as property_tax_noabate,
+    tb.annual_property_tax as property_tax,
+    tb.estimated_market_value as market_value,
+    tb.current_tax_rate as rate,
+    tb.tax_class as class
+  FROM mnmappluto as pluto
+  INNER JOIN mntaxbills AS tb
+    ON pluto.bbl = tb.bbl
+  
+  UNION ALL
+  
+  SELECT
+    pluto.the_geom as the_geom,
+    pluto.the_geom_webmercator as the_geom_webmercator,
+    pluto.bbl as bbl,
+  	pluto.bldgarea as bldgarea,
+  	pluto.numbldgs as numbldgs,
+    pluto.address as address,
+  	pluto.ownername as ownername,
+  	tb.tax_before_exemptions_and_abatements as property_tax_noexempt,
+  	tb.tax_before_abatements as property_tax_noabate,
+    tb.annual_property_tax as property_tax,
+    tb.estimated_market_value as market_value,
+    tb.current_tax_rate as rate,
+    tb.tax_class as class
+  FROM bxmappluto as pluto
+  INNER JOIN bxtaxbills AS tb
+    ON pluto.bbl = tb.bbl
+  
+  UNION ALL
+  
+  SELECT
+    pluto.the_geom as the_geom,
+    pluto.the_geom_webmercator as the_geom_webmercator,
+    pluto.bbl as bbl,
+  	pluto.bldgarea as bldgarea,
+  	pluto.numbldgs as numbldgs,
+    pluto.address as address,
+  	pluto.ownername as ownername,
+  	tb.tax_before_exemptions_and_abatements as property_tax_noexempt,
+  	tb.tax_before_abatements as property_tax_noabate,
+    tb.annual_property_tax as property_tax,
+    tb.estimated_market_value as market_value,
+    tb.current_tax_rate as rate,
+    tb.tax_class as class
+  FROM bkmappluto as pluto
+  INNER JOIN bktaxbills AS tb
+    ON pluto.bbl = tb.bbl
+  
+  UNION ALL
+  
+  SELECT
+    pluto.the_geom as the_geom,
+    pluto.the_geom_webmercator as the_geom_webmercator,
+    pluto.bbl as bbl,
+  	pluto.bldgarea as bldgarea,
+  	pluto.numbldgs as numbldgs,
+    pluto.address as address,
+  	pluto.ownername as ownername,
+  	tb.tax_before_exemptions_and_abatements as property_tax_noexempt,
+  	tb.tax_before_abatements as property_tax_noabate,
+    tb.annual_property_tax as property_tax,
+    tb.estimated_market_value as market_value,
+    tb.current_tax_rate as rate,
+    tb.tax_class as class
+  FROM bkmappluto as pluto
+  INNER JOIN bktaxbills AS tb
+    ON pluto.bbl = tb.bbl
+  
+  UNION ALL
+  
+  SELECT
+    pluto.the_geom as the_geom,
+    pluto.the_geom_webmercator as the_geom_webmercator,
+    pluto.bbl as bbl,
+  	pluto.bldgarea as bldgarea,
+  	pluto.numbldgs as numbldgs,
+    pluto.address as address,
+  	pluto.ownername as ownername,
+  	tb.tax_before_exemptions_and_abatements as property_tax_noexempt,
+  	tb.tax_before_abatements as property_tax_noabate,
+    tb.annual_property_tax as property_tax,
+    tb.estimated_market_value as market_value,
+    tb.current_tax_rate as rate,
+    tb.tax_class as class
+  FROM qnmappluto as pluto
+  INNER JOIN qntaxbills AS tb
+    ON pluto.bbl = tb.bbl
 
-![images/caps.png](images/caps.png)
-![images/gentrication.png](images/gentrification.png)
+) as fulldata
+WHERE property_tax > 0
+  AND market_value > 0
+  AND bldgarea > 0
+  AND numbldgs > 0
+) t
+WHERE div <= 1
+	AND benefit > 0
+    AND class = '1 - small home, less than 4 families'
+```
+
+The gentrifying neighborhoods are from [a Furman Center report](http://furmancenter.org/files/sotc/Part_1_Gentrification_SOCin2015_9JUNE2016.pdf).
+
+"High value" neighborhoods:
+```
+SELECT *
+FROM puma
+WHERE puma::int
+  IN (
+    3810,
+    4004,
+    3807,
+    4005,
+    3806,
+    4109
+  )
+ ```
+ 
+"Gentrifying" neighborhoods:
+```
+SELECT *
+FROM puma
+WHERE puma::int
+  IN (
+	4001,
+    3803,
+    3809,
+    4002,
+    3804,
+    3802,
+    4003,
+    4006,
+    3801,
+    3710,
+    4101,
+    4012,
+    3705,
+    4007,
+    4011
+  )
+ ```
+ 
+For the 3D rendering, the resultant table was exported as a GeoJSON and dumped into kepler.gl, with a solid black Mapbox basemap.
+
+The output is rendered as a 10k x 10k resolution PNG.
+
