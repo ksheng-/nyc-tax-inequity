@@ -10,7 +10,23 @@ This project is an attempt to visualize inequities in NYC's property tax system,
 ## What am I looking at?
 
 ## Data
-The data is derived from John Krauss' scraped tax bills (taxbills.nyc) and the Department of City Plannings MapPluto.
+The data is derived from John Krauss' scraped tax bills (taxbills.nyc) and the NYC Department of City Planning's MapPluto 18v2.
+
+PUMA data
+```
+curl -o puma.geojson https://data.cityofnewyork.us/api/geospatial/cwiz-gcty?method=export&format=GeoJSON
+```
+
+MapPLUTO data
+```
+curl -o "#1mappluto.csv" https://common-data.carto.com/api/v2/sql?format=csv&q=select%20cartodb_id,%20the_geom,%20address,%20bbl,%20bldgarea,%20numbldgs,%20numfloors,%20ownername,%20unitsres,%20unitstotal,%20yearbuilt,%20zipcode%20from%20public.{mn,bx,bk,qn}mappluto
+```
+
+This command will download a separate csv for each borough, more amenable to Carto's API limits.
+Instead of directly linking to the data library in Carto, I use their common data API to select the relevant columns and reupload the smaller table.
+
+There is a unified download for all 5 boroughs at https://common-data.carto.com/tables/nycpluto_all/public but it is too large to upload to import into a Carto student account, and also has a slightly different schema.
+
 
 You can explore the resulting CSVs using your tool of choice (I find xsv, SQLite, or csvkit + postgres usually work well, in order of complexity / "power").
 
