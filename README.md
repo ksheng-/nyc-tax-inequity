@@ -113,12 +113,12 @@ $ psql -d taxbills -f ../postgres/load_data.sql
 Filter only records from FY2017 since it has the most records, then pivot:
 
 ```
-$ postgres -d taxbills -f ../postgres/transform_data.sql
+$ psql -d taxbills -f ../postgres/transform_data.sql
 ```
 
 Save each borough as a separate CSV so they can be loaded into Carto's web interface:
 ```
-$ postgres -d taxbills -f ../postgres/export_data.sql
+$ psql -d taxbills -f ../postgres/export_data.sql
 ```
 
 **or, if you want to run it all at once:**
