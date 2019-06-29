@@ -103,7 +103,7 @@ SELECT * INTO TEMP fy2017 FROM rawdata where activityDate = '2017-06-02';
 Pivot the table so that tax details go into columns:
 ```
 SELECT * INTO details_crossed
-FROM crosstab('select bbl, key, value from details where key = ''estimated market value'' or key = ''tax before exemptions and abatements'' or key = ''tax before abatements'' or key = ''annual property tax'' or key = ''tax class'' or key = ''current tax rate''order by 1, 2')
+FROM crosstab('select bbl, key, value from fy2017 where key = ''estimated market value'' or key = ''tax before exemptions and abatements'' or key = ''tax before abatements'' or key = ''annual property tax'' or key = ''tax class'' or key = ''current tax rate''order by 1, 2')
 AS ct ("bbl" bigint, "estimated market value" text, "tax before exemptions and abatements" text, "tax before abatements" text, "annual property tax" text, "tax class" text, "current tax rate" text);
 ```
 
@@ -137,7 +137,7 @@ SELECT
  *
 FROM (
 SELECT
-	row_number() over() as cartodb_id,
+    row_number() over() as cartodb_id,
     the_geom,
     the_geom_webmercator,
     bbl,
@@ -291,7 +291,7 @@ SELECT *
 FROM puma
 WHERE puma::int
   IN (
-	4001,
+    4001,
     3803,
     3809,
     4002,
