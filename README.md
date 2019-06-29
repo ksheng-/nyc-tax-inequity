@@ -103,9 +103,11 @@ Create a Postgres table
 psql -c "create database taxbills"
 ```
 
+Make sure all your psql login settings work.
+
 Insert the csv into a Postgres table:
 ```
-$ postgres -d taxbills -f ../postgres/load_data.sql
+$ psql -d taxbills -f ../postgres/load_data.sql
 ```
 
 Filter only records from FY2017 since it has the most records, then pivot:
@@ -119,7 +121,7 @@ Save each borough as a separate CSV so they can be loaded into Carto's web inter
 $ postgres -d taxbills -f ../postgres/export_data.sql
 ```
 
-** or, if you want to run it all at once:**
+**or, if you want to run it all at once:**
 ```
 $ ../postgres/run_all.sh
 ```
