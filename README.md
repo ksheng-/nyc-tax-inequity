@@ -4,19 +4,20 @@ This project is an attempt to visualize inequities in NYC's property tax system,
 † https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2377590<br />
 † http://furmancenter.org/thestoop/entry/new-york-city-property-tax-reform<br />
 † https://www.economist.com/finance-and-economics/2015/10/03/assessing-the-assessments<br />
-
-<img src="content/caps_small.png" width="500" height="500" />
-<img src="content/gentrification_small.png" width="500" height="500" />
+<p float="left">
+<img src="content/caps_small.png" width="400" />
+<img src="content/gentrification_small.png" width="400" />
+</p>
 
 ## Explore the maps
 #### 3D map
-[poster](https://drive.google.com/open?id=1nAIgSNuzRgw3Rs5xJk7HZ6YW_1CUd4_B)[14MB pdf]<br />
+[poster](https://drive.google.com/open?id=1nAIgSNuzRgw3Rs5xJk7HZ6YW_1CUd4_B) [14MB pdf]<br />
 [kepler.gl map](https://drive.google.com/file/d/1234Po1ge4IhH5a4svLkN-yvvVmQkIlNV/view?usp=sharing) [336MB html]<br />
 [image only](content/caps.png) [8000 x 8000 PNG, 14KB])<br />
 [geodata](data/only_houses.geojson.gz) [509,818 row GeoJSON, 45MB compressed, 260MB uncompressed]<br />
 
 #### 2D map
-[poster](https://drive.google.com/open?id=1vNoUIyf2VWZx5eY6cppaZtUXXuiaRDjU)[37MB pdf]<br />
+[poster](https://drive.google.com/open?id=1vNoUIyf2VWZx5eY6cppaZtUXXuiaRDjU) [37MB pdf]<br />
 [kepler.gl map](https://drive.google.com/open?id=1Dd5X1II2AYC-bNBt1rJRXwpDnWm0Miu3) [430MB html]<br />
 [image only](content/gentrification.png) [10000 x 10000 PNG, 34KB]<br />
 [geodata](data/all_buildings.geojson.gz) [612,288 row GeoJSON, 60MB compressed, 320MB uncompressed]<br />
