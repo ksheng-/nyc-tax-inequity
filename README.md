@@ -69,26 +69,18 @@ The housing market in NYC is valued at over [1 trillion dollars](https://www1.ny
 So, in a situation where appreciation in the housing market massively benefits the richest of the rich, who are the main beneficiaries of this policy?
 
 ## From tax bills to maps
+
+All of these were run on Ubuntu 18.04 with PostgreSQL 10.9
+
+Move into the directory of your choice (it can be anywhere, just change the relative paths accordingly):
+```
+$ mkdir rawdata
+$ cd rawdata
+```
+
 Retrive the raw tax bills (~10.5 GB, 130M rows):
 ```
 $ curl -O http://taxbills.nyc/rawdata.csv
-```
-
-Insert the csv into a postgres table:
-```
-$ psql -c 'drop table if exists rawdata cascade;'
-$ psql -c 'create table rawdata (
-         bbl bigint,
-         activityThrough DATE,
-         section TEXT,
-         key TEXT,
-         dueDate DATE,
-         activityDate DATE,
-         value TEXT,
-         meta TEXT,
-         apts TEXT
-        );'
-$ time psql -c "\\copy rawdata FROM 'rawdata.csv' WITH CSV HEADER NULL '' QUOTE '\"';"
 ```
 
 ```
@@ -106,24 +98,25 @@ activityThrough,2011-11-18,2403325
 activityThrough,2011-08-26,2333950
 ```
 
-Filter only records from FY2017 since it has the most records.
+Create a Postgres table
 ```
-SELECT * INTO TEMP fy2017 FROM rawdata where activityDate = '2017-06-02';
+psql -c "create database taxbills"
 ```
 
-Pivot the table so that tax details go into columns:
+Insert the csv into a Postgres table:
 ```
-SELECT * INTO details_crossed
-FROM crosstab('select bbl, key, value from fy2017 where key = ''estimated market value'' or key = ''tax before exemptions and abatements'' or key = ''tax before abatements'' or key = ''annual property tax'' or key = ''tax class'' or key = ''current tax rate''order by 1, 2')
-AS ct ("bbl" bigint, "estimated market value" text, "tax before exemptions and abatements" text, "tax before abatements" text, "annual property tax" text, "tax class" text, "current tax rate" text);
+$ ../postgres/load_data.sh
+```
+
+Filter only records from FY2017 since it has the most records, then pivot:
+
+```
+$ postgres -d taxbills -f ../postgres/transform_data.sql
 ```
 
 Save each borough as a separate CSV so they can be loaded into Carto's web interface:
 ```
-\copy (SELECT * FROM details_crossed where LEFT(bbl::text, 1) = '1') TO '~/mntaxbills.csv' WITH CSV;
-\copy (SELECT * FROM details_crossed where LEFT(bbl::text, 1) = '2') TO '~/bxtaxbills.csv' WITH CSV;
-\copy (SELECT * FROM details_crossed where LEFT(bbl::text, 1) = '3') TO '~/bktaxbills.csv' WITH CSV;
-\copy (SELECT * FROM details_crossed where LEFT(bbl::text, 1) = '4') TO '~/qntaxbills.csv' WITH CSV;
+$ postgres -d taxbills -f ../postgres/export_data.sql
 ```
 
 Download MapPLUTO data:
