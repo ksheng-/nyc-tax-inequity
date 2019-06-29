@@ -6,8 +6,8 @@ This project is an attempt to visualize inequities in NYC's property tax system,
 † http://furmancenter.org/thestoop/entry/new-york-city-property-tax-reform<br />
 † https://www.economist.com/finance-and-economics/2015/10/03/assessing-the-assessments<br />
 
-![images/caps.png](images/caps.png)
-![images/gentrication.png](images/gentrification.png)
+![content/caps_small.png](content/caps.png)
+![content/gentrification_small.png](content/gentrification.png)
 
 ## Explore the maps
 [3D kepler.gl map](https://drive.google.com/file/d/1234Po1ge4IhH5a4svLkN-yvvVmQkIlNV/view?usp=sharing) (this one loads the entire dataset (~300 MB) client side, don't recommend this on mobile) 
