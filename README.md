@@ -10,8 +10,8 @@ This project is an attempt to visualize inequities in NYC's property tax system,
 ![images/gentrication.png](images/gentrification.png)
 
 ## Explore the maps
+[3D kepler.gl map](https://drive.google.com/file/d/1234Po1ge4IhH5a4svLkN-yvvVmQkIlNV/view?usp=sharing) (this one loads the entire dataset (~300 MB) client side, don't recommend this on mobile) 
 [2D Carto map](https://ksheng.carto.com/builder/2a0665fd-a3ba-4c4a-9d27-198ca99fdf4c/embed)<br />
-[3D kepler.gl map](https://drive.google.com/file/d/1234Po1ge4IhH5a4svLkN-yvvVmQkIlNV/view?usp=sharing) (this one loads the entire dataset client side, don't attempt this on mobile) 
 
 The interactive Carto map contains a superset of the columns used for the final map renderings for every class 1 building, so you can poke around and see where the numbers come from.
 
