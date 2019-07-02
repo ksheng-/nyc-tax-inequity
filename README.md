@@ -5,8 +5,8 @@ This project is an attempt to visualize inequities in NYC's property tax system,
 † http://furmancenter.org/thestoop/entry/new-york-city-property-tax-reform<br />
 † https://www.economist.com/finance-and-economics/2015/10/03/assessing-the-assessments<br />
 <p float="left">
-<img src="content/caps_small.png" width="425" />
-<img src="content/gentrification_small.png" width="425" />
+<img src="https://raw.githubusercontent.com/ksheng-/nyc-tax-inequity/master/caps_small.png" width="425" />
+<img src="https://raw.githubusercontent.com/ksheng-/nyc-tax-inequity/master/gentrification_small.png" width="425" />
 </p>
 
 ## Explore the maps
