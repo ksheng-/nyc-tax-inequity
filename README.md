@@ -13,14 +13,14 @@ This project is an attempt to visualize inequities in NYC's property tax system,
 #### 3D map
 [poster](https://drive.google.com/open?id=1nAIgSNuzRgw3Rs5xJk7HZ6YW_1CUd4_B) [14MB pdf]<br />
 [kepler.gl map](https://drive.google.com/file/d/1234Po1ge4IhH5a4svLkN-yvvVmQkIlNV/view?usp=sharing) [336MB html]<br />
-[image only](content/caps.png) [8000 x 8000 PNG, 14KB])<br />
-[geodata](data/only_houses.geojson.gz) [509,818 row GeoJSON, 45MB compressed, 260MB uncompressed]<br />
+[image only](https://raw.githubusercontent.com/ksheng-/nyc-tax-inequity/master/content/caps.png) [8000 x 8000 PNG, 14KB])<br />
+[geodata](https://raw.githubusercontent.com/ksheng-/nyc-tax-inequity/master/data/only_houses.geojson.gz) [509,818 row GeoJSON, 45MB compressed, 260MB uncompressed]<br />
 
 #### 2D map
 [poster](https://drive.google.com/open?id=1vNoUIyf2VWZx5eY6cppaZtUXXuiaRDjU) [37MB pdf]<br />
 [kepler.gl map](https://drive.google.com/open?id=1Dd5X1II2AYC-bNBt1rJRXwpDnWm0Miu3) [430MB html]<br />
-[image only](content/gentrification.png) [10000 x 10000 PNG, 34KB]<br />
-[geodata](data/all_buildings.geojson.gz) [612,288 row GeoJSON, 60MB compressed, 320MB uncompressed]<br />
+[image only](https://raw.githubusercontent.com/ksheng-/nyc-tax-inequity/master/content/gentrification.png) [10000 x 10000 PNG, 34KB]<br />
+[geodata](https://raw.githubusercontent.com/ksheng-/nyc-tax-inequity/master/data/all_buildings.geojson.gz) [612,288 row GeoJSON, 60MB compressed, 320MB uncompressed]<br />
 [Carto map](https://ksheng.carto.com/builder/2a0665fd-a3ba-4c4a-9d27-198ca99fdf4c/embed)<br />
 
 The interactive Carto map contains a superset of the columns used for the final map renderings for every class 1 building, so you can poke around and see where the numbers come from.
