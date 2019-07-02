@@ -1,9 +1,9 @@
 # nyc-tax-inequity
 This project is an attempt to visualize inequities in NYC's property tax system, primarily the regressive effect of capping annual property tax increases. These property tax caps, sold as a way of protecting fixed income homeowners in rapidly appreciating neighborhoods, instead overwhelmingly benefit already wealthy property owners.
 
-† [https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2377590]<br />
-† [http://furmancenter.org/thestoop/entry/new-york-city-property-tax-reform]<br />
-† [https://www.economist.com/finance-and-economics/2015/10/03/assessing-the-assessments]<br />
+† [https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2377590](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2377590)<br />
+† [http://furmancenter.org/thestoop/entry/new-york-city-property-tax-reform](http://furmancenter.org/thestoop/entry/new-york-city-property-tax-reform)<br />
+† [https://www.economist.com/finance-and-economics/2015/10/03/assessing-the-assessments](https://www.economist.com/finance-and-economics/2015/10/03/assessing-the-assessments)<br />
 <p float="left">
 <img src="https://raw.githubusercontent.com/ksheng-/nyc-tax-inequity/master/content/caps_small.png" width="425" />
 <img src="https://raw.githubusercontent.com/ksheng-/nyc-tax-inequity/master/content/gentrification_small.png" width="425" />
