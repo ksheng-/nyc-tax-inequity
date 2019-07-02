@@ -1,9 +1,9 @@
 # nyc-tax-inequity
 This project is an attempt to visualize inequities in NYC's property tax system, primarily the regressive effect of capping annual property tax increases. These property tax caps, sold as a way of protecting fixed income homeowners in rapidly appreciating neighborhoods, instead overwhelmingly benefit already wealthy property owners.
 
-† https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2377590<br />
-† http://furmancenter.org/thestoop/entry/new-york-city-property-tax-reform<br />
-† https://www.economist.com/finance-and-economics/2015/10/03/assessing-the-assessments<br />
+† [https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2377590]<br />
+† [http://furmancenter.org/thestoop/entry/new-york-city-property-tax-reform]<br />
+† [https://www.economist.com/finance-and-economics/2015/10/03/assessing-the-assessments]<br />
 <p float="left">
 <img src="https://raw.githubusercontent.com/ksheng-/nyc-tax-inequity/master/content/caps_small.png" width="425" />
 <img src="https://raw.githubusercontent.com/ksheng-/nyc-tax-inequity/master/content/gentrification_small.png" width="425" />
@@ -73,17 +73,17 @@ So, in a situation where appreciation in the housing market massively benefits t
 All of these were run on Ubuntu 18.04 with PostgreSQL 10.9
 
 Move into the directory of your choice (it can be anywhere, just change the relative paths accordingly):
-```
+```bash
 $ mkdir rawdata
 $ cd rawdata
 ```
 
 Retrive the raw tax bills (~10.5 GB, 130M rows):
-```
+```bash
 $ curl -O http://taxbills.nyc/rawdata.csv
 ```
 
-```
+```bash
 $ xsv frequency rawdata.csv -s activityThrough
 field,value,count
 activityThrough,2017-06-02,28584244
@@ -99,35 +99,35 @@ activityThrough,2011-08-26,2333950
 ```
 
 Create a Postgres table
-```
+```bash
 psql -c "create database taxbills"
 ```
 
 Make sure all your psql login settings work.
 
 Insert the csv into a Postgres table:
-```
+```bash
 $ psql -d taxbills -f ../postgres/load_data.sql
 ```
 
 Filter only records from FY2017 since it has the most records, then pivot:
 
-```
+```bash
 $ psql -d taxbills -f ../postgres/transform_data.sql
 ```
 
 Save each borough as a separate CSV so they can be loaded into Carto's web interface:
-```
+```bash
 $ psql -d taxbills -f ../postgres/export_data.sql
 ```
 
 **or, if you want to run it all at once:**
-```
+```bash
 $ ../postgres/run_all.sh
 ```
 
 Download MapPLUTO data:
-```
+```bash
 $ curl -o "#1mappluto.csv" https://common-data.carto.com/api/v2/sql?format=csv&q=select%20cartodb_id,%20the_geom,%20address,%20bbl,%20bldgarea,%20numbldgs,%20numfloors,%20ownername,%20unitsres,%20unitstotal,%20yearbuilt,%20zipcode%20from%20public.{mn,bx,bk,qn}mappluto
 ```
 This command will download a separate csv for each borough, more amenable to Carto's API limits.
@@ -136,14 +136,14 @@ Instead of directly linking to the data library in Carto, I use their common dat
 There is a unified download for all 5 boroughs at https://common-data.carto.com/tables/nycpluto_all/public but it is too large to upload to import into a Carto student account, and also has a slightly different schema.
 
 Download PUMA data:
-```
+```bash
 $ curl -o puma.geojson https://data.cityofnewyork.us/api/geospatial/cwiz-gcty?method=export&format=GeoJSON
 ```
 
 You can explore the resulting CSVs using your tool of choice (I find xsv, SQLite, or csvkit + postgres usually work well, in order of complexity / "power").
 
 At this point, all of these lables were loaded into Carto's web interface for visual exploration, using the following query to get the main metrics.
-```
+```sql
 SELECT
  *
 FROM (
@@ -282,7 +282,7 @@ WHERE div <= 1
 The gentrifying neighborhoods are from [a Furman Center report](http://furmancenter.org/files/sotc/Part_1_Gentrification_SOCin2015_9JUNE2016.pdf).
 
 "High value" neighborhoods:
-```
+```sql
 SELECT *
 FROM puma
 WHERE puma::int
@@ -297,7 +297,7 @@ WHERE puma::int
  ```
  
 "Gentrifying" neighborhoods:
-```
+```sql
 SELECT *
 FROM puma
 WHERE puma::int
