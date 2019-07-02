@@ -36,7 +36,7 @@ We find the actual dollar value saved because of these tax caps for every class 
 
 As an alternate view, we also calculate the property value you are effectively paying taxes on (the "effective market value").
 
-[For reference, this is random Notice of Property Value from the NYC Department of Finance.](content/nopv.pdf)
+[For reference, this is a random Notice of Property Value from the NYC Department of Finance.](content/nopv.pdf)
 
 Here, you can see how taxes are calculated and how the 6% tax cap is applied.
 
